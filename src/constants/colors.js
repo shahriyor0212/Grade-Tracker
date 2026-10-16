@@ -1,0 +1,78 @@
+export const SUBJECT_COLORS = {
+  indigo: {
+    id: 'indigo',
+    name: 'Indigo',
+    dot: 'bg-indigo-500',
+    badge: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800/60',
+    accentBorder: 'border-l-indigo-500',
+    bar: 'bg-indigo-500',
+    highlight: 'text-indigo-600 dark:text-indigo-400',
+  },
+  emerald: {
+    id: 'emerald',
+    name: 'Emerald',
+    dot: 'bg-emerald-500',
+    badge: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60',
+    accentBorder: 'border-l-emerald-500',
+    bar: 'bg-emerald-500',
+    highlight: 'text-emerald-600 dark:text-emerald-400',
+  },
+  sky: {
+    id: 'sky',
+    name: 'Sky',
+    dot: 'bg-sky-500',
+    badge: 'bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-800/60',
+    accentBorder: 'border-l-sky-500',
+    bar: 'bg-sky-500',
+    highlight: 'text-sky-600 dark:text-sky-400',
+  },
+  violet: {
+    id: 'violet',
+    name: 'Violet',
+    dot: 'bg-violet-500',
+    badge: 'bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border-violet-200 dark:border-violet-800/60',
+    accentBorder: 'border-l-violet-500',
+    bar: 'bg-violet-500',
+    highlight: 'text-violet-600 dark:text-violet-400',
+  },
+  rose: {
+    id: 'rose',
+    name: 'Rose',
+    dot: 'bg-rose-500',
+    badge: 'bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800/60',
+    accentBorder: 'border-l-rose-500',
+    bar: 'bg-rose-500',
+    highlight: 'text-rose-600 dark:text-rose-400',
+  },
+  amber: {
+    id: 'amber',
+    name: 'Amber',
+    dot: 'bg-amber-500',
+    badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800/60',
+    accentBorder: 'border-l-amber-500',
+    bar: 'bg-amber-500',
+    highlight: 'text-amber-600 dark:text-amber-400',
+  },
+  teal: {
+    id: 'teal',
+    name: 'Teal',
+    dot: 'bg-teal-500',
+    badge: 'bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200 dark:border-teal-800/60',
+    accentBorder: 'border-l-teal-500',
+    bar: 'bg-teal-500',
+    highlight: 'text-teal-600 dark:text-teal-400',
+  },
+  fuchsia: {
+    id: 'fuchsia',
+    name: 'Fuchsia',
+    dot: 'bg-fuchsia-500',
+    badge: 'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:text-fuchsia-300 border-fuchsia-200 dark:border-fuchsia-800/60',
+    accentBorder: 'border-l-fuchsia-500',
+    bar: 'bg-fuchsia-500',
+    highlight: 'text-fuchsia-600 dark:text-fuchsia-400',
+  },
+};
+
+export function getSubjectColor(colorKey) {
+  return SUBJECT_COLORS[colorKey] || SUBJECT_COLORS.indigo;
+}
