@@ -5,7 +5,8 @@
  */
 import { getTodayString } from './dateUtils';
 
-export const STORAGE_KEY = 'minimal_grade_tracker_data_v2';
+export const STORAGE_KEY = 'minimal_grade_tracker_data_v3';
+export const LEGACY_STORAGE_KEY = 'minimal_grade_tracker_data_v2';
 export const THEME_KEY = 'grade_tracker_theme';
 export const HABITS_KEY = 'grade_tracker_habits_v1';
 
@@ -37,17 +38,6 @@ export function generateId(prefix = '') {
   return `${prefix ? `${prefix}-` : ''}${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-/**
- * Creates relative YYYY-MM-DD date strings for sample data
- */
-function getRelativeDateString(offsetDays) {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
 /**
  * Daily scholar habit checklist template (Targets view)
@@ -61,223 +51,9 @@ export const DEFAULT_HABITS = [
 ];
 
 /**
- * High-quality initial mock data to showcase the app immediately.
- * Active term subjects use relative dates; archived terms use fixed history dates.
+ * Initial subjects collection (empty for new users).
  */
-export const DEFAULT_INITIAL_SUBJECTS = [
-  {
-    id: 'subj-1',
-    name: 'Advanced Calculus',
-    code: 'MATH 241',
-    color: 'indigo',
-    term: ACTIVE_TERM,
-    targetGrade: 90,
-    exams: [
-      {
-        id: 'exam-101',
-        title: 'Quiz 1: Limits & Continuity',
-        date: getRelativeDateString(-21),
-        score: 94,
-        notes: 'Covers Stewart Chapter 2',
-        examType: 'Quiz',
-        readiness: null,
-      },
-      {
-        id: 'exam-102',
-        title: 'Midterm 1: Differential Calculus',
-        date: getRelativeDateString(-7),
-        score: 88,
-        notes: 'Room 304, Formula sheet provided',
-        examType: 'Midterm',
-        readiness: null,
-      },
-      {
-        id: 'exam-103',
-        title: 'Quiz 2: Integration Techniques',
-        date: getRelativeDateString(3),
-        score: null,
-        notes: 'Focus on integration by parts',
-        examType: 'Quiz',
-        readiness: 70,
-      },
-      {
-        id: 'exam-104',
-        title: 'Final Examination',
-        date: getRelativeDateString(28),
-        score: null,
-        notes: 'Comprehensive 3-hour exam',
-        examType: 'Final',
-        readiness: 45,
-      },
-    ],
-  },
-  {
-    id: 'subj-2',
-    name: 'Data Structures & Algorithms',
-    code: 'CS 210',
-    color: 'emerald',
-    term: ACTIVE_TERM,
-    targetGrade: 92,
-    exams: [
-      {
-        id: 'exam-201',
-        title: 'Exam 1: Arrays, Stacks & Queues',
-        date: getRelativeDateString(-14),
-        score: 96,
-        notes: 'Asymptotic notation & implementations',
-        examType: 'Midterm',
-        readiness: null,
-      },
-      {
-        id: 'exam-202',
-        title: 'Exam 2: Trees & Heaps',
-        date: getRelativeDateString(1),
-        score: null,
-        notes: 'AVL Trees, BST, Binary Heaps',
-        examType: 'Midterm',
-        readiness: 60,
-      },
-      {
-        id: 'exam-203',
-        title: 'Final Practicum & Theory',
-        date: getRelativeDateString(20),
-        score: null,
-        notes: 'Graph algorithms & Dynamic Programming',
-        examType: 'Final',
-        readiness: 35,
-      },
-    ],
-  },
-  {
-    id: 'subj-3',
-    name: 'Physics: Mechanics & Waves',
-    code: 'PHYS 101',
-    color: 'sky',
-    term: ACTIVE_TERM,
-    targetGrade: 85,
-    exams: [
-      {
-        id: 'exam-301',
-        title: 'Newtonian Dynamics Test',
-        date: getRelativeDateString(-28),
-        score: 82,
-        notes: 'Forces, friction, circular motion',
-        examType: 'Quiz',
-        readiness: null,
-      },
-      {
-        id: 'exam-302',
-        title: 'Midterm Test',
-        date: getRelativeDateString(-10),
-        score: 79,
-        notes: 'Work, energy & momentum',
-        examType: 'Midterm',
-        readiness: null,
-      },
-      {
-        id: 'exam-303',
-        title: 'Waves & Oscillations Exam',
-        date: getRelativeDateString(7),
-        score: null,
-        notes: 'Harmonic motion, resonance',
-        examType: 'Practicum',
-        readiness: 55,
-      },
-    ],
-  },
-  {
-    id: 'subj-4',
-    name: 'Introduction to Statistics',
-    code: 'STAT 110',
-    color: 'teal',
-    term: `Spring ${new Date().getFullYear() - 1}`,
-    targetGrade: 88,
-    exams: [
-      {
-        id: 'exam-401',
-        title: 'Quiz 1: Descriptive Statistics',
-        date: `${new Date().getFullYear() - 1}-02-15`,
-        score: 91,
-        notes: 'Distributions & sampling',
-        examType: 'Quiz',
-        readiness: null,
-      },
-      {
-        id: 'exam-402',
-        title: 'Midterm: Probability & Distributions',
-        date: `${new Date().getFullYear() - 1}-03-18`,
-        score: 86,
-        notes: 'Bayes theorem emphasis',
-        examType: 'Midterm',
-        readiness: null,
-      },
-      {
-        id: 'exam-403',
-        title: 'Lab Practicum: Regression Analysis',
-        date: `${new Date().getFullYear() - 1}-04-22`,
-        score: 89,
-        notes: 'Hands-on statistical software',
-        examType: 'Practicum',
-        readiness: null,
-      },
-      {
-        id: 'exam-404',
-        title: 'Final Examination',
-        date: `${new Date().getFullYear() - 1}-05-10`,
-        score: 93,
-        notes: 'Cumulative, closed book',
-        examType: 'Final',
-        readiness: null,
-      },
-    ],
-  },
-  {
-    id: 'subj-5',
-    name: 'Academic Writing & Rhetoric',
-    code: 'WRIT 101',
-    color: 'violet',
-    term: `Fall ${new Date().getFullYear() - 2}`,
-    targetGrade: 85,
-    exams: [
-      {
-        id: 'exam-501',
-        title: 'Diagnostic Essay',
-        date: `${new Date().getFullYear() - 2}-09-25`,
-        score: 84,
-        notes: 'Thesis construction baseline',
-        examType: 'Quiz',
-        readiness: null,
-      },
-      {
-        id: 'exam-502',
-        title: 'Midterm: Argumentative Writing',
-        date: `${new Date().getFullYear() - 2}-10-30`,
-        score: 87,
-        notes: 'Counterargument required',
-        examType: 'Midterm',
-        readiness: null,
-      },
-      {
-        id: 'exam-503',
-        title: 'Practicum: Source Synthesis',
-        date: `${new Date().getFullYear() - 2}-11-27`,
-        score: 90,
-        notes: 'Annotated bibliography review',
-        examType: 'Practicum',
-        readiness: null,
-      },
-      {
-        id: 'exam-504',
-        title: 'Final Portfolio',
-        date: `${new Date().getFullYear() - 2}-12-18`,
-        score: 92,
-        notes: 'Collected semester writings',
-        examType: 'Final',
-        readiness: null,
-      },
-    ],
-  },
-];
+export const DEFAULT_INITIAL_SUBJECTS = [];
 
 /**
  * Normalizes any raw subject array (legacy storage or imported JSON) into the
@@ -332,21 +108,37 @@ export function normalizeSubjects(raw) {
 
 /**
  * Safely loads data from localStorage with try/catch protection.
- * If data doesn't exist, returns the default sample subjects.
- * If JSON parsing fails or data is corrupted, returns default and logs error.
+ * If data doesn't exist, returns an empty array for a clean starting state.
+ * If JSON parsing fails or data is corrupted, returns an empty array.
  * Loaded data is normalized so legacy records gain the new fields.
  */
 export function loadStoredSubjects() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      // Check legacy storage key to clean up old pre-populated mock data
+      const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacyRaw) {
+        const legacyParsed = JSON.parse(legacyRaw);
+        const isMockData =
+          Array.isArray(legacyParsed) &&
+          legacyParsed.length === 5 &&
+          legacyParsed.every((s, i) => s.id === `subj-${i + 1}`);
+        if (!isMockData && Array.isArray(legacyParsed)) {
+          return normalizeSubjects(legacyParsed);
+        }
+      }
       return DEFAULT_INITIAL_SUBJECTS;
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
+      // Filter out old sample mock subjects if still present
+      const isMockData =
+        parsed.length === 5 && parsed.every((s, i) => s.id === `subj-${i + 1}`);
+      if (isMockData) return [];
       return normalizeSubjects(parsed);
     }
-    console.warn('[GradeTracker] Corrupted subjects structure in storage. Falling back to defaults.');
+    console.warn('[GradeTracker] Corrupted subjects structure in storage. Falling back to empty.');
     return DEFAULT_INITIAL_SUBJECTS;
   } catch (error) {
     console.error('[GradeTracker] Error parsing localStorage data:', error);

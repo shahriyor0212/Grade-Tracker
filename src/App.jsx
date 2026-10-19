@@ -14,7 +14,6 @@ import {
   saveStoredSubjects,
   loadStoredTheme,
   saveStoredTheme,
-  DEFAULT_INITIAL_SUBJECTS
 } from './utils/storage';
 import { DEFAULT_VIEW, isValidView } from './constants/views';
 import { AlertCircle } from 'lucide-react';
@@ -167,14 +166,14 @@ export default function App() {
     );
   };
 
-  // Reset to initial demo data
+  // Clear all data
   const promptResetData = () => {
     setConfirmModal({
       isOpen: true,
-      title: 'Reset to Sample Data?',
-      message: 'This will replace your current data with the realistic demo subjects and exams.',
+      title: 'Clear All Data?',
+      message: 'This will permanently remove all your subjects and exam records.',
       onConfirm: () => {
-        setSubjects(DEFAULT_INITIAL_SUBJECTS);
+        setSubjects([]);
       },
     });
   };
@@ -220,7 +219,6 @@ export default function App() {
             subjects={subjects}
             onAddSubject={() => setSubjectModal({ isOpen: true, editingSubject: null })}
             onAddExam={openExamModal}
-            onResetData={promptResetData}
             onEditSubject={(subjectToEdit) =>
               setSubjectModal({ isOpen: true, editingSubject: subjectToEdit })
             }

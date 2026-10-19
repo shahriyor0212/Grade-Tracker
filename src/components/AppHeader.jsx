@@ -205,7 +205,7 @@ export default function AppHeader({
                     className="w-full flex items-center gap-2 px-2.5 py-2 rounded text-error hover:bg-error/5 transition text-left"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset to Demo Data</span>
+                    <span>Clear All Data</span>
                   </button>
                 </div>
               </>

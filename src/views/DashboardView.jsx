@@ -16,7 +16,6 @@ export default function DashboardView({
   subjects = [],
   onAddSubject,
   onAddExam,
-  onResetData,
   onEditSubject,
   onDeleteSubject,
   onEditExam,
@@ -148,15 +147,6 @@ export default function DashboardView({
               <Plus className="w-3.5 h-3.5" />
               <span>Create Subject</span>
             </button>
-            {subjects.length === 0 && (
-              <button
-                type="button"
-                onClick={onResetData}
-                className="px-3.5 py-2 text-xs font-semibold text-on-surface-variant dark:text-night-muted border border-outline-variant dark:border-night-border rounded hover:bg-surface-container-low dark:hover:bg-night-surface transition"
-              >
-                Load Sample Data
-              </button>
-            )}
           </div>
         </div>
       ) : (
