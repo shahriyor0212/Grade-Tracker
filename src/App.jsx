@@ -1,27 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import StatsOverview from './components/StatsOverview';
-import UpcomingTimeline from './components/UpcomingTimeline';
-import SubjectCard from './components/SubjectCard';
+import AppHeader from './components/AppHeader';
+import AppFooter from './components/AppFooter';
+import DashboardView from './views/DashboardView';
+import TargetsView from './views/TargetsView';
+import ArchiveView from './views/ArchiveView';
 import SubjectModal from './components/SubjectModal';
 import ExamModal from './components/ExamModal';
 import QuickScoreModal from './components/QuickScoreModal';
 import ConfirmModal from './components/ConfirmModal';
 
-import { 
-  loadStoredSubjects, 
-  saveStoredSubjects, 
-  loadStoredTheme, 
+import {
+  loadStoredSubjects,
+  saveStoredSubjects,
+  loadStoredTheme,
   saveStoredTheme,
-  DEFAULT_INITIAL_SUBJECTS 
+  DEFAULT_INITIAL_SUBJECTS
 } from './utils/storage';
-import { Search, Plus, BookOpen, AlertCircle } from 'lucide-react';
+import { DEFAULT_VIEW, isValidView } from './constants/views';
+import { AlertCircle } from 'lucide-react';
 
 export default function App() {
   const [subjects, setSubjects] = useState(() => loadStoredSubjects());
   const [theme, setTheme] = useState(() => loadStoredTheme());
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState('all'); // 'all', 'upcoming', 'graded'
+  const [activeView, setActiveView] = useState(() => {
+    const hashView = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+    return isValidView(hashView) ? hashView : DEFAULT_VIEW;
+  });
 
   // Modals state
   const [subjectModal, setSubjectModal] = useState({ isOpen: false, editingSubject: null });
@@ -39,6 +43,11 @@ export default function App() {
     }
     saveStoredTheme(theme);
   }, [theme]);
+
+  // Reflect active tab in the URL hash (deep-linkable tabs)
+  useEffect(() => {
+    window.location.hash = activeView;
+  }, [activeView]);
 
   // Sync subjects to localStorage with safe try/catch wrapper
   useEffect(() => {
@@ -78,6 +87,24 @@ export default function App() {
   };
 
   // --- Handlers: Exams ---
+  // Accepts an optional subjectId (from a subject card) — falls back to first subject.
+  const openExamModal = (subjectId) => {
+    setExamModal({
+      isOpen: true,
+      preselectedSubjectId:
+        typeof subjectId === 'string' && subjectId ? subjectId : subjects[0]?.id || null,
+      editingExam: null,
+    });
+  };
+
+  const handleEditExam = (subjectId, exam) => {
+    setExamModal({
+      isOpen: true,
+      preselectedSubjectId: subjectId,
+      editingExam: { ...exam, subjectId },
+    });
+  };
+
   const handleSaveExam = ({ subjectId, exam }) => {
     setSubjects(prev => {
       return prev.map(subject => {
@@ -157,31 +184,20 @@ export default function App() {
     setSubjects(importedSubjects);
   };
 
-  // --- Filtering & Search ---
-  const filteredSubjects = subjects.filter(subject => {
-    const matchesSearch = 
-      subject.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (subject.code && subject.code.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    if (!matchesSearch) return false;
-
-    if (filterMode === 'upcoming') {
-      return (subject.exams || []).some(e => e.score === null || e.score === undefined);
-    }
-    if (filterMode === 'graded') {
-      return (subject.exams || []).some(e => typeof e.score === 'number');
-    }
-    return true;
-  });
+  const openQuickScore = (subjectId, exam) => {
+    setQuickScoreModal({ isOpen: true, item: { subjectId, exam } });
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-200">
-      
-      {/* Top Navbar */}
-      <Navbar
+    <div className="min-h-screen flex flex-col bg-surface dark:bg-night-canvas text-on-surface dark:text-night-ink transition-colors duration-200">
+
+      {/* Fixed 56px Swiss telemetry header */}
+      <AppHeader
         subjects={subjects}
+        activeView={activeView}
+        onViewChange={setActiveView}
         onAddSubject={() => setSubjectModal({ isOpen: true, editingSubject: null })}
-        onAddExam={() => setExamModal({ isOpen: true, preselectedSubjectId: subjects[0]?.id || null, editingExam: null })}
+        onAddExam={openExamModal}
         theme={theme}
         onToggleTheme={toggleTheme}
         onImportData={handleImportData}
@@ -189,158 +205,40 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
         {/* Storage Warning Alert if quota reached */}
         {storageWarning && (
-          <div className="mb-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-200 text-sm flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="mb-6 p-4 rounded border border-error/40 bg-error/5 text-error text-sm flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 shrink-0" />
             <span>{storageWarning}</span>
           </div>
         )}
 
-        {/* High-level Overview Dashboard */}
-        <StatsOverview subjects={subjects} />
-
-        {/* Chronological Upcoming Timeline */}
-        <UpcomingTimeline
-          subjects={subjects}
-          onQuickScore={(subjectId, exam) => {
-            setQuickScoreModal({
-              isOpen: true,
-              item: { subjectId, exam },
-            });
-          }}
-          onAddExam={() => setExamModal({ isOpen: true, preselectedSubjectId: subjects[0]?.id || null, editingExam: null })}
-        />
-
-        {/* Subjects Section Header & Controls */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
-              Enrolled Subjects & Exam Grades
-            </h2>
-          </div>
-
-          {/* Search & Filter pills */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative flex-1 sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-zinc-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search subject or code..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-              />
-            </div>
-
-            <div className="inline-flex rounded-xl bg-zinc-200/60 dark:bg-zinc-800 p-0.5 text-xs font-semibold">
-              <button
-                onClick={() => setFilterMode('all')}
-                className={`px-2.5 py-1 rounded-lg transition ${
-                  filterMode === 'all'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterMode('upcoming')}
-                className={`px-2.5 py-1 rounded-lg transition ${
-                  filterMode === 'upcoming'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                }`}
-              >
-                Upcoming
-              </button>
-              <button
-                onClick={() => setFilterMode('graded')}
-                className={`px-2.5 py-1 rounded-lg transition ${
-                  filterMode === 'graded'
-                    ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                }`}
-              >
-                Graded
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Subjects Grid */}
-        {filteredSubjects.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 p-12 text-center">
-            <BookOpen className="w-10 h-10 mx-auto text-zinc-300 dark:text-zinc-700 mb-3" />
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-              {searchQuery ? 'No matching subjects found' : 'No subjects added yet'}
-            </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
-              {searchQuery 
-                ? 'Try tweaking your search term or filter' 
-                : 'Create your first subject to start tracking tests, dates, and performance percentages.'}
-            </p>
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button
-                onClick={() => setSubjectModal({ isOpen: true, editingSubject: null })}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-xs transition"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create Subject</span>
-              </button>
-              {subjects.length === 0 && (
-                <button
-                  onClick={promptResetData}
-                  className="px-3.5 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 rounded-xl transition"
-                >
-                  Load Sample Data
-                </button>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {filteredSubjects.map(subject => (
-              <SubjectCard
-                key={subject.id}
-                subject={subject}
-                onAddExamToSubject={(subjectId) => {
-                  setExamModal({
-                    isOpen: true,
-                    preselectedSubjectId: subjectId,
-                    editingExam: null,
-                  });
-                }}
-                onEditExam={(subjectId, exam) => {
-                  setExamModal({
-                    isOpen: true,
-                    preselectedSubjectId: subjectId,
-                    editingExam: { ...exam, subjectId },
-                  });
-                }}
-                onDeleteExam={promptDeleteExam}
-                onQuickScore={(subjectId, exam) => {
-                  setQuickScoreModal({
-                    isOpen: true,
-                    item: { subjectId, exam },
-                  });
-                }}
-                onEditSubject={(subjectToEdit) => {
-                  setSubjectModal({
-                    isOpen: true,
-                    editingSubject: subjectToEdit,
-                  });
-                }}
-                onDeleteSubject={promptDeleteSubject}
-              />
-            ))}
-          </div>
+        {activeView === 'dashboard' && (
+          <DashboardView
+            subjects={subjects}
+            onAddSubject={() => setSubjectModal({ isOpen: true, editingSubject: null })}
+            onAddExam={openExamModal}
+            onResetData={promptResetData}
+            onEditSubject={(subjectToEdit) =>
+              setSubjectModal({ isOpen: true, editingSubject: subjectToEdit })
+            }
+            onDeleteSubject={promptDeleteSubject}
+            onEditExam={handleEditExam}
+            onDeleteExam={promptDeleteExam}
+            onQuickScore={openQuickScore}
+            onQuickScoreSave={handleQuickScoreSave}
+          />
         )}
 
+        {activeView === 'targets' && <TargetsView subjects={subjects} />}
+
+        {activeView === 'archive' && <ArchiveView subjects={subjects} />}
       </main>
+
+      {/* Clinical academic footer */}
+      <AppFooter />
 
       {/* Modals */}
       <SubjectModal

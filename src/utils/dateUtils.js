@@ -23,7 +23,7 @@ export function isValidDateString(dateStr) {
   const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return false;
   
-  const [, y, m, d] = match.map(Number);
+  const [, , m, d] = match.map(Number);
   if (m < 1 || m > 12 || d < 1 || d > 31) return false;
   return true;
 }

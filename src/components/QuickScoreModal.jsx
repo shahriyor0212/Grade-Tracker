@@ -7,8 +7,21 @@ export default function QuickScoreModal({ isOpen, onClose, onSave, item }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     if (item?.exam) {
-      setScore(item.exam.score !== null && item.exam.score !== undefined ? String(item.exam.score) : '');
+      setScore(
+        item.exam.score !== null && item.exam.score !== undefined ? String(item.exam.score) : ''
+      );
     } else {
       setScore('');
     }
@@ -37,47 +50,53 @@ export default function QuickScoreModal({ isOpen, onClose, onSave, item }) {
   const presetScores = [100, 95, 90, 85, 80, 75];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-xs animate-fade-in">
-      <div 
-        className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 relative"
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="quick-score-title"
+        className="modal-shell max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-sm font-bold text-zinc-900 dark:text-white">
-            Record Exam Score
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition"
-          >
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant dark:border-night-border">
+          <div>
+            <p className="font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted mb-1">
+              Score Entry
+            </p>
+            <h2 id="quick-score-title" className="modal-title">
+              Record Score
+            </h2>
+          </div>
+          <button onClick={onClose} aria-label="Close dialog" className="modal-close">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Info */}
-        <div className="mt-3 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/60 dark:border-zinc-800">
-          <div className="text-xs font-semibold text-zinc-900 dark:text-white truncate">
+        <div className="p-3 rounded border border-outline-variant dark:border-night-border bg-surface-container-low dark:bg-night-canvas">
+          <div className="text-xs font-semibold text-on-surface dark:text-night-ink truncate">
             {item.exam.title}
           </div>
-          <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {formatReadableDate(item.exam.date)}
+          <div className="mt-0.5 font-mono text-[10px] text-on-surface-variant dark:text-night-muted">
+            {item.exam.date} · {formatReadableDate(item.exam.date)}
           </div>
         </div>
 
         {error && (
-          <div className="mt-3 p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
+          <div role="alert" className="modal-error">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Score Percentage (%)
+            <label htmlFor="quick-score-input" className="field-label">
+              Score (%)
             </label>
             <div className="relative">
               <input
+                id="quick-score-input"
                 type="number"
                 step="0.1"
                 min="0"
@@ -86,16 +105,16 @@ export default function QuickScoreModal({ isOpen, onClose, onSave, item }) {
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
                 autoFocus
-                className="w-full px-3.5 py-2.5 pr-8 text-base font-mono font-bold rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="field-input pr-8 font-mono text-base font-semibold"
               />
-              <Percent className="w-4 h-4 absolute right-3 top-3.5 text-zinc-400 pointer-events-none" />
+              <Percent className="w-4 h-4 absolute right-3 top-2.5 text-on-surface-variant dark:text-night-muted pointer-events-none" />
             </div>
           </div>
 
           {/* Quick preset chips */}
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-zinc-400 font-semibold mb-1.5">
-              Quick presets
+            <div className="font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted mb-1.5">
+              Quick Presets
             </div>
             <div className="flex flex-wrap gap-1.5">
               {presetScores.map((preset) => (
@@ -103,7 +122,8 @@ export default function QuickScoreModal({ isOpen, onClose, onSave, item }) {
                   type="button"
                   key={preset}
                   onClick={() => setScore(String(preset))}
-                  className="px-2 py-1 text-xs rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-mono text-zinc-700 dark:text-zinc-300 transition"
+                  aria-label={`Set score to ${preset} percent`}
+                  className="px-2 py-1 text-xs font-mono rounded border border-outline-variant dark:border-night-border text-on-surface-variant dark:text-night-muted hover:border-on-surface dark:hover:border-night-ink hover:text-on-surface dark:hover:text-night-ink transition"
                 >
                   {preset}%
                 </button>
@@ -112,18 +132,11 @@ export default function QuickScoreModal({ isOpen, onClose, onSave, item }) {
           </div>
 
           {/* Actions */}
-          <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3.5 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-xl transition"
-            >
+          <div className="modal-actions">
+            <button type="button" onClick={onClose} className="btn-secondary">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1 px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-sm transition active:scale-95"
-            >
+            <button type="submit" className="btn-primary">
               <Check className="w-3.5 h-3.5" />
               <span>Save Score</span>
             </button>

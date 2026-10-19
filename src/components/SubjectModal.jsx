@@ -1,23 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check } from 'lucide-react';
 import { SUBJECT_COLORS } from '../constants/colors';
+import { generateId, ACTIVE_TERM } from '../utils/storage';
 
 export default function SubjectModal({ isOpen, onClose, onSave, editingSubject }) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [term, setTerm] = useState(ACTIVE_TERM);
   const [color, setColor] = useState('indigo');
   const [targetGrade, setTargetGrade] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     if (editingSubject) {
       setName(editingSubject.name || '');
       setCode(editingSubject.code || '');
+      setTerm(editingSubject.term || ACTIVE_TERM);
       setColor(editingSubject.color || 'indigo');
-      setTargetGrade(editingSubject.targetGrade !== undefined ? String(editingSubject.targetGrade) : '');
+      setTargetGrade(
+        editingSubject.targetGrade !== undefined && editingSubject.targetGrade !== null
+          ? String(editingSubject.targetGrade)
+          : ''
+      );
     } else {
       setName('');
       setCode('');
+      setTerm(ACTIVE_TERM);
       setColor('indigo');
       setTargetGrade('85');
     }
@@ -44,9 +63,10 @@ export default function SubjectModal({ isOpen, onClose, onSave, editingSubject }
     }
 
     onSave({
-      id: editingSubject ? editingSubject.id : `subj-${Date.now()}`,
+      id: editingSubject ? editingSubject.id : generateId('subj'),
       name: name.trim(),
       code: code.trim().toUpperCase(),
+      term: term.trim() || ACTIVE_TERM,
       color,
       targetGrade: parsedTarget,
       exams: editingSubject ? editingSubject.exams : [],
@@ -56,97 +76,117 @@ export default function SubjectModal({ isOpen, onClose, onSave, editingSubject }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/40 backdrop-blur-xs animate-fade-in">
-      <div 
-        className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 relative"
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="subject-modal-title"
+        className="modal-shell max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-100 dark:border-zinc-800">
-          <h2 className="text-base font-bold text-zinc-900 dark:text-white">
-            {editingSubject ? 'Edit Subject' : 'Add New Subject'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition"
-          >
+        <div className="flex items-center justify-between pb-4 mb-5 border-b border-outline-variant dark:border-night-border">
+          <div>
+            <p className="font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted mb-1">
+              {editingSubject ? 'Amend Course' : 'New Course'}
+            </p>
+            <h2 id="subject-modal-title" className="modal-title">
+              {editingSubject ? 'Edit Subject' : 'Add Subject'}
+            </h2>
+          </div>
+          <button onClick={onClose} aria-label="Close dialog" className="modal-close">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-xs text-rose-700 dark:text-rose-300">
+          <div role="alert" className="modal-error">
             {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Subject Name */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-              Subject Name <span className="text-rose-500">*</span>
+            <label htmlFor="subject-name-input" className="field-label">
+              Subject Name *
             </label>
             <input
+              id="subject-name-input"
               type="text"
               placeholder="e.g. Advanced Calculus, World History"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              className="field-input"
               autoFocus
+              required
             />
           </div>
 
-          {/* Subject Code & Target Grade */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Code, Term & Target */}
+          <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Course Code
+              <label htmlFor="subject-code-input" className="field-label">
+                Code
               </label>
               <input
+                id="subject-code-input"
                 type="text"
-                placeholder="e.g. MATH 240"
+                placeholder="MATH 240"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm uppercase rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="field-input uppercase"
               />
             </div>
-
             <div>
-              <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
-                Target Grade (%)
+              <label htmlFor="subject-term-input" className="field-label">
+                Term
               </label>
               <input
+                id="subject-term-input"
+                type="text"
+                placeholder={ACTIVE_TERM}
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                className="field-input"
+              />
+            </div>
+            <div>
+              <label htmlFor="target-grade-input" className="field-label">
+                Target (%)
+              </label>
+              <input
+                id="target-grade-input"
                 type="number"
                 min="0"
                 max="100"
-                placeholder="e.g. 90"
+                placeholder="90"
                 value={targetGrade}
                 onChange={(e) => setTargetGrade(e.target.value)}
-                className="w-full px-3.5 py-2 text-sm rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="field-input font-mono"
               />
             </div>
           </div>
 
           {/* Color Tag Picker */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
-              Color Tag
-            </label>
+            <label className="field-label">Color Tag</label>
             <div className="grid grid-cols-4 gap-2">
               {Object.values(SUBJECT_COLORS).map((item) => (
                 <button
                   type="button"
                   key={item.id}
                   onClick={() => setColor(item.id)}
-                  className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition ${
+                  aria-label={`Select color ${item.name}`}
+                  aria-pressed={color === item.id}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded border text-xs font-medium transition ${
                     color === item.id
-                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 font-bold'
-                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-600 dark:text-zinc-400'
+                      ? 'border-on-surface dark:border-night-ink bg-surface-container-low dark:bg-night-canvas text-on-surface dark:text-night-ink font-semibold'
+                      : 'border-outline-variant dark:border-night-border hover:border-on-surface-variant dark:hover:border-night-muted text-on-surface-variant dark:text-night-muted'
                   }`}
                 >
-                  <span className={`w-3 h-3 rounded-full ${item.dot}`} />
+                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${item.dot}`} />
                   <span className="truncate">{item.name}</span>
                 </button>
               ))}
@@ -154,23 +194,15 @@ export default function SubjectModal({ isOpen, onClose, onSave, editingSubject }
           </div>
 
           {/* Actions */}
-          <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-xl transition"
-            >
+          <div className="modal-actions">
+            <button type="button" onClick={onClose} className="btn-secondary">
               Cancel
             </button>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-sm transition active:scale-95"
-            >
+            <button type="submit" className="btn-primary">
               <Check className="w-3.5 h-3.5" />
               <span>{editingSubject ? 'Save Changes' : 'Create Subject'}</span>
             </button>
           </div>
-
         </form>
       </div>
     </div>

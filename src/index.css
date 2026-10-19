@@ -3,24 +3,85 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    overscroll-behavior: none;
   }
 }
 
-/* Custom subtle scrollbar */
+@layer components {
+  .modal-shell {
+    @apply w-full max-w-md bg-surface-container-lowest dark:bg-night-surface rounded-lg border border-outline-variant dark:border-night-border shadow-2xl p-6 relative;
+  }
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/30 backdrop-blur-[2px] animate-fade-in;
+  }
+  .modal-title {
+    @apply text-base font-semibold tracking-tight text-on-surface dark:text-night-ink;
+  }
+  .modal-close {
+    @apply p-1 rounded text-on-surface-variant dark:text-night-muted hover:text-on-surface dark:hover:text-night-ink transition focus:outline-none focus:ring-2 focus:ring-on-surface/30 dark:focus:ring-night-ink/30;
+  }
+  .modal-error {
+    @apply mt-4 p-2.5 rounded border border-error/30 bg-error/5 text-xs text-error;
+  }
+  .modal-actions {
+    @apply pt-4 mt-1 border-t border-outline-variant dark:border-night-border flex items-center justify-end gap-2;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white dark:text-night-canvas bg-on-surface dark:bg-night-ink rounded hover:bg-on-surface/90 dark:hover:bg-night-ink/90 transition active:scale-95;
+  }
+  .btn-secondary {
+    @apply px-4 py-2 text-xs font-semibold text-on-surface-variant dark:text-night-muted hover:text-on-surface dark:hover:text-night-ink rounded transition;
+  }
+  .btn-destructive {
+    @apply inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-error rounded hover:bg-error/90 transition active:scale-95;
+  }
+  .field-label {
+    @apply block font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted mb-1.5;
+  }
+  .field-input {
+    @apply w-full px-3 py-2 text-sm rounded bg-surface-container-low dark:bg-night-canvas border border-outline-variant dark:border-night-border text-on-surface dark:text-night-ink placeholder-on-surface-variant dark:placeholder-night-muted focus:outline-none focus:border-on-surface dark:focus:border-night-ink transition;
+  }
+  .field-select {
+    @apply w-full px-3 py-2 text-sm rounded bg-surface-container-low dark:bg-night-canvas border border-outline-variant dark:border-night-border text-on-surface dark:text-night-ink focus:outline-none focus:border-on-surface dark:focus:border-night-ink transition;
+  }
+  .field-checkbox {
+    @apply w-4 h-4 rounded-[2px] accent-[#6366f1] cursor-pointer;
+  }
+}
+
+/* Material Symbols optical styling alignment */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Subtle hairline scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.25);
+  background: #c6c6cd;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.45);
+  background: #76777d;
 }

@@ -1,28 +1,27 @@
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  MoreVertical, 
-  Edit3, 
-  Trash2, 
-  Calendar, 
-  Target, 
-  CheckCircle2, 
-  Clock, 
-  ChevronDown, 
-  ChevronUp 
+import {
+  Plus,
+  MoreVertical,
+  Edit3,
+  Trash2,
+  Calendar,
+  Target,
+  Clock,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { calculateSubjectMean, getLetterGrade, getScoreColorBadge } from '../utils/gradeCalculations';
 import { getCountdownInfo, formatReadableDate } from '../utils/dateUtils';
 import { getSubjectColor } from '../constants/colors';
 
-export default function SubjectCard({ 
-  subject, 
-  onAddExamToSubject, 
-  onEditExam, 
-  onDeleteExam, 
+export default function SubjectCard({
+  subject,
+  onAddExamToSubject,
+  onEditExam,
+  onDeleteExam,
   onQuickScore,
-  onEditSubject, 
-  onDeleteSubject 
+  onEditSubject,
+  onDeleteSubject,
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
@@ -33,61 +32,71 @@ export default function SubjectCard({
   const color = getSubjectColor(subject.color);
 
   const exams = subject.exams || [];
-  const gradedCount = exams.filter(e => typeof e.score === 'number' && !isNaN(e.score)).length;
+  const gradedCount = exams.filter((e) => typeof e.score === 'number' && !isNaN(e.score)).length;
   const target = subject.targetGrade;
 
   return (
-    <div className={`rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs overflow-hidden transition-all duration-200 hover:border-zinc-300 dark:hover:border-zinc-700 border-l-4 ${color.accentBorder}`}>
-      
+    <div className="rounded-lg bg-surface-container-lowest dark:bg-night-surface border border-outline-variant dark:border-night-border overflow-hidden transition-colors hover:border-on-surface-variant/60 dark:hover:border-night-muted/50">
       {/* Header */}
-      <div className="p-5">
+      <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
-          
           {/* Subject info */}
-          <div className="space-y-1">
+          <div className="space-y-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${color.badge}`}>
-                {subject.code || 'SUBJECT'}
+              <span className="flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${color.dot}`} aria-hidden="true" />
+                <span className="font-label-caps text-[10px] uppercase text-on-surface dark:text-night-ink">
+                  {subject.code || 'Subject'}
+                </span>
               </span>
               {target && (
-                <span className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
-                  <Target className="w-3 h-3 text-zinc-400" />
-                  Target: {target}%
+                <span className="flex items-center gap-1 font-mono text-[10px] text-on-surface-variant dark:text-night-muted">
+                  <Target className="w-3 h-3" aria-hidden="true" />
+                  tgt {target}%
+                </span>
+              )}
+              {subject.term && (
+                <span className="font-label-caps text-[9px] uppercase px-1.5 py-0.5 rounded border border-outline-variant dark:border-night-border text-on-surface-variant dark:text-night-muted">
+                  {subject.term}
                 </span>
               )}
             </div>
-            
-            <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white tracking-tight">
+
+            <h3 className="text-base sm:text-lg font-semibold tracking-tight text-on-surface dark:text-night-ink truncate">
               {subject.name}
             </h3>
           </div>
 
-          {/* Subject Mean Grade badge & Options menu */}
-          <div className="flex items-center gap-2">
-            
-            {/* Grade Badge */}
+          {/* Subject Mean badge & Options menu */}
+          <div className="flex items-center gap-2 shrink-0">
             <div className="text-right">
               <div className="flex items-baseline justify-end gap-1.5">
-                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+                <span className="font-mono text-xl sm:text-2xl font-semibold tabular-nums text-on-surface dark:text-night-ink">
                   {subjectMean !== null ? `${subjectMean}%` : '—'}
                 </span>
                 {subjectMean !== null && (
-                  <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded border ${badgeStyle.bg} ${badgeStyle.text} ${badgeStyle.border}`}>
+                  <span
+                    className={`font-label-caps text-[9px] uppercase px-1.5 py-0.5 rounded border ${badgeStyle.bg} ${badgeStyle.text} ${badgeStyle.border}`}
+                  >
                     {letterGrade}
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-zinc-400">
-                {gradedCount} of {exams.length} scored
+              <p className="mt-0.5 font-label-caps text-[9px] uppercase text-on-surface-variant dark:text-night-muted">
+                {gradedCount} / {exams.length} scored
               </p>
             </div>
 
             {/* Menu Dropdown */}
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                className="p-1.5 rounded text-on-surface-variant dark:text-night-muted hover:text-on-surface dark:hover:text-night-ink hover:bg-surface-container-low dark:hover:bg-night-canvas transition"
                 title="Subject options"
+                aria-label={`Options for ${subject.name}`}
+                aria-expanded={showMenu}
+                aria-haspopup="true"
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
@@ -95,15 +104,15 @@ export default function SubjectCard({
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-20" onClick={() => setShowMenu(false)} />
-                  <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 p-1 z-30 text-xs">
+                  <div className="absolute right-0 mt-1 w-36 rounded bg-surface-container-lowest dark:bg-night-surface shadow-lg border border-outline-variant dark:border-night-border p-1 z-30 text-xs">
                     <button
                       onClick={() => {
                         setShowMenu(false);
                         onEditSubject(subject);
                       }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition text-left"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-on-surface dark:text-night-ink hover:bg-surface-container-low dark:hover:bg-night-canvas transition text-left"
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-zinc-400" />
+                      <Edit3 className="w-3.5 h-3.5 text-on-surface-variant dark:text-night-muted" />
                       <span>Edit Subject</span>
                     </button>
                     <button
@@ -111,7 +120,7 @@ export default function SubjectCard({
                         setShowMenu(false);
                         onDeleteSubject(subject.id);
                       }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition text-left"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded text-error hover:bg-error/5 transition text-left"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Delete</span>
@@ -120,112 +129,129 @@ export default function SubjectCard({
                 </>
               )}
             </div>
-
           </div>
         </div>
 
-        {/* Progress Bar against Target Goal (if specified) */}
+        {/* Progress Bar against Target Goal */}
         {target && (
           <div className="mt-3">
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-              <div 
+            <div className="w-full bg-outline-variant/40 dark:bg-night-border h-0.5 rounded-full overflow-hidden">
+              <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  subjectMean !== null && subjectMean >= target ? 'bg-emerald-500' : color.bar
+                  subjectMean !== null && subjectMean >= target
+                    ? 'bg-secondary'
+                    : subjectMean !== null && subjectMean >= target - 5
+                    ? 'bg-[#6366f1]'
+                    : 'bg-error'
                 }`}
-                style={{ width: `${Math.min(100, Math.max(0, subjectMean !== null ? subjectMean : 0))}%` }}
+                style={{
+                  width: `${Math.min(100, Math.max(0, subjectMean !== null ? subjectMean : 0))}%`,
+                }}
               />
             </div>
           </div>
         )}
 
-        {/* Toggle Collapse & Add Exam button */}
-        <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-800/80 flex items-center justify-between">
+        {/* Toggle Collapse & Add Exam */}
+        <div className="mt-4 pt-3 border-t border-outline-variant dark:border-night-border flex items-center justify-between">
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition"
+            aria-expanded={isExpanded}
+            aria-label={`${isExpanded ? 'Hide' : 'Show'} exams for ${subject.name}`}
+            className="flex items-center gap-1.5 font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted hover:text-on-surface dark:hover:text-night-ink transition"
           >
             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            <span>{isExpanded ? 'Hide' : 'Show'} Exams ({exams.length})</span>
+            <span>{isExpanded ? 'Hide' : 'Show'} Assessments ({exams.length})</span>
           </button>
 
           <button
             onClick={() => onAddExamToSubject(subject.id)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition"
+            className="inline-flex items-center gap-1 font-label-caps text-[10px] uppercase text-on-surface dark:text-night-ink hover:text-on-surface-variant dark:hover:text-night-muted transition"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add Exam</span>
+            <span>Add Assessment</span>
           </button>
         </div>
       </div>
 
       {/* Exams Accordion Content */}
       {isExpanded && (
-        <div className="bg-zinc-50/50 dark:bg-zinc-950/30 border-t border-zinc-100 dark:border-zinc-800/60 p-4 space-y-2.5">
+        <div className="border-t border-outline-variant dark:border-night-border bg-surface-container-low/50 dark:bg-night-canvas/40 p-3 sm:p-4 space-y-2">
           {exams.length === 0 ? (
-            <div className="py-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
-              No exams added for this subject yet. Click "Add Exam" to track tests and dates.
+            <div className="py-4 text-center font-label-caps text-[10px] uppercase text-on-surface-variant dark:text-night-muted">
+              No assessments recorded
             </div>
           ) : (
             exams.map((exam) => {
               const hasScore = typeof exam.score === 'number' && !isNaN(exam.score);
               const countdown = getCountdownInfo(exam.date, hasScore);
               const examBadge = getScoreColorBadge(hasScore ? exam.score : null);
+              const countdownTone =
+                countdown.status === 'today' || countdown.status === 'tomorrow'
+                  ? 'text-[#6366f1] border-[#6366f1]/40 bg-[#6366f1]/5'
+                  : countdown.status === 'overdue'
+                  ? 'text-error border-error/40 bg-error/5'
+                  : 'text-on-surface-variant dark:text-night-muted border-outline-variant dark:border-night-border';
 
               return (
                 <div
                   key={exam.id}
-                  className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition"
+                  className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded border border-outline-variant dark:border-night-border bg-surface-container-lowest dark:bg-night-surface hover:border-on-surface-variant/60 dark:hover:border-night-muted/50 transition"
                 >
                   {/* Left: Exam Details */}
-                  <div className="space-y-0.5">
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      <span className="text-xs sm:text-sm font-semibold text-on-surface dark:text-night-ink">
                         {exam.title}
                       </span>
 
-                      {/* Countdown badge if upcoming / pending */}
+                      {exam.examType && (
+                        <span className="font-label-caps text-[9px] uppercase px-1.5 py-0.5 rounded border border-outline-variant dark:border-night-border text-on-surface-variant dark:text-night-muted">
+                          {exam.examType}
+                        </span>
+                      )}
+
                       {!hasScore && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                          countdown.status === 'today' || countdown.status === 'tomorrow'
-                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                            : countdown.status === 'overdue'
-                            ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                            : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-                        }`}>
+                        <span
+                          className={`font-label-caps text-[9px] uppercase px-1.5 py-0.5 rounded border ${countdownTone}`}
+                        >
                           {countdown.label}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-                      <Calendar className="w-3 h-3 text-zinc-400" />
-                      <span>{exam.date} ({formatReadableDate(exam.date)})</span>
+                    <div className="mt-1 flex items-center gap-1.5 font-mono text-[10px] text-on-surface-variant dark:text-night-muted">
+                      <Calendar className="w-3 h-3" aria-hidden="true" />
+                      <span>{exam.date}</span>
+                      <span className="opacity-70">({formatReadableDate(exam.date)})</span>
                     </div>
 
                     {exam.notes && (
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 italic">
+                      <p className="mt-1 text-[11px] italic text-on-surface-variant dark:text-night-muted line-clamp-1">
                         {exam.notes}
                       </p>
                     )}
                   </div>
 
                   {/* Right: Score percentage & Actions */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-zinc-800/80">
-                    
+                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-outline-variant dark:border-night-border">
                     {/* Score display or "Enter Score" prompt */}
                     {hasScore ? (
                       <div className="flex items-center gap-2">
-                        <div className={`px-2.5 py-1 rounded-lg border font-mono text-sm font-bold ${examBadge.bg} ${examBadge.text} ${examBadge.border}`}>
+                        <div
+                          className={`px-2 py-0.5 rounded border font-mono text-xs font-semibold tabular-nums ${examBadge.bg} ${examBadge.text} ${examBadge.border}`}
+                        >
                           {exam.score}%
                         </div>
-                        <span className="text-[11px] font-semibold text-zinc-400">
+                        <span className="font-label-caps text-[9px] uppercase text-on-surface-variant dark:text-night-muted">
                           {getLetterGrade(exam.score)}
                         </span>
                       </div>
                     ) : (
                       <button
                         onClick={() => onQuickScore(subject.id, exam)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 transition"
+                        className="inline-flex items-center gap-1 px-2 py-1 font-label-caps text-[9px] uppercase rounded border border-outline-variant dark:border-night-border text-on-surface dark:text-night-ink hover:bg-on-surface hover:text-white dark:hover:bg-night-ink dark:hover:text-night-canvas transition"
                       >
                         <Clock className="w-3 h-3" />
                         <span>Enter Score</span>
@@ -235,21 +261,24 @@ export default function SubjectCard({
                     {/* Action buttons */}
                     <div className="flex items-center gap-1 opacity-80 sm:opacity-0 group-hover:opacity-100 transition">
                       <button
+                        type="button"
                         onClick={() => onEditExam(subject.id, exam)}
-                        className="p-1 rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                        className="p-1 rounded text-on-surface-variant dark:text-night-muted hover:text-on-surface dark:hover:text-night-ink hover:bg-surface-container-low dark:hover:bg-night-canvas transition"
                         title="Edit exam"
+                        aria-label={`Edit exam ${exam.title}`}
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => onDeleteExam(subject.id, exam.id)}
-                        className="p-1 rounded text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
+                        className="p-1 rounded text-on-surface-variant dark:text-night-muted hover:text-error hover:bg-error/5 transition"
                         title="Delete exam"
+                        aria-label={`Delete exam ${exam.title}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
-
                   </div>
                 </div>
               );
@@ -257,7 +286,6 @@ export default function SubjectCard({
           )}
         </div>
       )}
-
     </div>
   );
 }
